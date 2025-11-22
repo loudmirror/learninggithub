@@ -8,8 +8,9 @@ const nextConfig = {
     domains: ['github.com', 'avatars.githubusercontent.com'],
   },
   // 显式配置 webpack 路径别名，确保 Vercel 构建时能正确解析
-  webpack: (config) => {
-    config.resolve.alias['@'] = path.join(__dirname, 'src');
+  // 使用 process.cwd() 而非 __dirname，更适合 Vercel 环境
+  webpack: (config, { isServer }) => {
+    config.resolve.alias['@'] = path.resolve(process.cwd(), 'src');
     return config;
   },
 }
