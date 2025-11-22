@@ -1,0 +1,35 @@
+{
+  "cached_at": "2025-11-21T10:21:44.116801",
+  "key": "repo_info:https://github.com/vercel/next.js",
+  "value": {
+    "owner": "vercel",
+    "name": "next.js",
+    "full_name": "vercel/next.js",
+    "description": "The React Framework",
+    "stars": 135765,
+    "forks": 29878,
+    "language": "JavaScript",
+    "topics": [
+      "react",
+      "server-rendering",
+      "universal",
+      "node",
+      "components",
+      "browser",
+      "nextjs",
+      "vercel",
+      "static-site-generator",
+      "hybrid",
+      "ssg",
+      "static",
+      "blog",
+      "compiler"
+    ],
+    "default_branch": "canary",
+    "created_at": "2016-10-05T23:32:51+00:00",
+    "updated_at": "2025-11-20T23:58:36+00:00",
+    "clone_url": "https://github.com/vercel/next.js.git",
+    "homepage": "https://nextjs.org",
+    "license": "MIT License"
+  }
+}

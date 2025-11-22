@@ -1,0 +1,12 @@
+{
+  "cached_at": "2025-11-22T00:31:01.738036",
+  "key": "repo_tree:https://github.com/octocat/Hello-World::2",
+  "value": [
+    {
+      "name": "README",
+      "path": "README",
+      "type": "file",
+      "size": 13
+    }
+  ]
+}
