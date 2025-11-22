@@ -95,15 +95,17 @@ export async function getTutorial(
   const { repoUrl, language = 'zh-CN' } = params;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/tutorial`, {
-      method: 'POST',
+    // 构建 URL query parameters
+    const queryParams = new URLSearchParams({
+      repoUrl: repoUrl,
+      language: language,
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/tutorial?${queryParams}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        repo_url: repoUrl,
-        language,
-      }),
     });
 
     const data = await response.json();
