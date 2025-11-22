@@ -27,19 +27,18 @@ export default function MarkdownRenderer({
         rehypePlugins={[rehypeHighlight]}
         components={{
           // 自定义代码块样式
-          code({ node, inline, className, children, ...props }) {
-            return inline ? (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            ) : (
-              <code className={`${className} hljs`} {...props}>
+          code({ className, children, ...props }) {
+            // 在 react-markdown v10 中，内联代码和代码块的区分
+            // 通过检查是否有语言类名来判断（代码块通常有 language-xxx 类名）
+            const isCodeBlock = className?.includes('language-');
+            return (
+              <code className={isCodeBlock ? `${className} hljs` : className} {...props}>
                 {children}
               </code>
             );
           },
           // 自定义链接 - 在新窗口打开
-          a({ node, children, href, ...props }) {
+          a({ children, href, ...props }) {
             return (
               <a
                 href={href}
