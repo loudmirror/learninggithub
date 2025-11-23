@@ -15,7 +15,12 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
 
     # CORS
-    cors_origins: List[str] = ["http://localhost:3000"]
+    cors_origins: List[str] = [
+        "http://localhost:3000",
+        "https://learninggithub-frontend.vercel.app",
+        "https://learninggithub.com",
+        "https://www.learninggithub.com",
+    ]
 
     # Logging
     log_level: str = "INFO"
