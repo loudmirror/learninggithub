@@ -18,19 +18,15 @@ app = FastAPI(
     debug=settings.debug,
 )
 
-# CORS configuration - ensure all domains are allowed
-ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://learninggithub-frontend.vercel.app",
-    "https://learninggithub.com",
-    "https://www.learninggithub.com",
-]
-# Merge with settings to support additional origins from env
-all_origins = list(set(ALLOWED_ORIGINS + settings.cors_origins))
-
+# CORS configuration - hardcoded to avoid env variable issues
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=all_origins,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://learninggithub-frontend.vercel.app",
+        "https://learninggithub.com",
+        "https://www.learninggithub.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
