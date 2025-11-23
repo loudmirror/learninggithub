@@ -17,8 +17,6 @@ import {
   ExportOutlined,
   WarningOutlined,
   ClockCircleOutlined,
-  BookOutlined,
-  InfoCircleOutlined,
   RocketOutlined,
 } from '@ant-design/icons';
 import { useTutorial } from '@/lib/hooks';
@@ -219,16 +217,7 @@ export default function HomePage() {
             <span className={styles.logoSubtitle}>智能每一个GitHub项目</span>
           </div>
         </div>
-        <nav className={styles.navLinks}>
-          <a className={styles.navLink} href="#usage">
-            <BookOutlined />
-            使用说明
-          </a>
-          <a className={styles.navLink} href="#about">
-            <InfoCircleOutlined />
-            关于
-          </a>
-        </nav>
+{/* 导航链接已移除 */}
       </header>
 
       {/* 主内容 */}
