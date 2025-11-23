@@ -214,7 +214,7 @@ export default function HomePage() {
           </div>
           <div className={styles.logoText}>
             <span className={styles.logoTitle}>LearningGitHub</span>
-            <span className={styles.logoSubtitle}>智能每一个GitHub项目</span>
+            <span className={styles.logoSubtitle}>看懂每一个GitHub项目</span>
           </div>
         </div>
 {/* 导航链接已移除 */}
@@ -328,8 +328,7 @@ export default function HomePage() {
         {/* 热门项目 */}
         <div className={styles.popularSection}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>最近学习的项目</h2>
-            <p className={styles.sectionSubtitle}>社区正在学习这些热门仓库</p>
+            <h2 className={styles.sectionTitle}>你可能喜欢的仓库</h2>
           </div>
 
           <div className={styles.projectsGrid}>
