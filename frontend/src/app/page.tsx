@@ -1,151 +1,394 @@
 /**
  * Home Page
- * 主页 - GitHub 仓库 URL 输入页面
+ * 主页 - 根据 Figma 设计稿重新设计
  */
 
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Layout, Typography, Space, Card, Divider } from 'antd';
-import { GithubOutlined, RocketOutlined } from '@ant-design/icons';
-import UrlInput from '@/components/home/UrlInput';
-import LanguageSelector, { type Language } from '@/components/home/LanguageSelector';
-import RecentProjects from '@/components/home/RecentProjects';
+import { Spin, message } from 'antd';
+import {
+  LinkOutlined,
+  ThunderboltOutlined,
+  ReadOutlined,
+  GithubOutlined,
+  StarOutlined,
+  ExportOutlined,
+  WarningOutlined,
+  ClockCircleOutlined,
+  BookOutlined,
+  InfoCircleOutlined,
+  RocketOutlined,
+} from '@ant-design/icons';
 import { useTutorial } from '@/lib/hooks';
+import type { Language } from '@/components/home/LanguageSelector';
+import styles from './page.module.css';
 
-const { Header, Content, Footer } = Layout;
-const { Title, Paragraph, Text } = Typography;
+// 热门项目数据
+const POPULAR_PROJECTS = [
+  {
+    owner: 'tensorflow',
+    repo: 'tensorflow',
+    desc: 'An Open Source Machine Learning Framework',
+    lang: 'C++',
+    langColor: '#f34b7d',
+    stars: '185k',
+  },
+  {
+    owner: 'vuejs',
+    repo: 'vue',
+    desc: 'The Progressive JavaScript Framework',
+    lang: 'TypeScript',
+    langColor: '#3178c6',
+    stars: '207k',
+  },
+  {
+    owner: 'django',
+    repo: 'django',
+    desc: 'The Web framework for perfectionists',
+    lang: 'Python',
+    langColor: '#3572a5',
+    stars: '78k',
+  },
+  {
+    owner: 'rust-lang',
+    repo: 'rust',
+    desc: 'A language empowering everyone',
+    lang: 'Rust',
+    langColor: '#dea584',
+    stars: '95k',
+  },
+  {
+    owner: 'facebook',
+    repo: 'react',
+    desc: 'A JavaScript library for building user interfaces',
+    lang: 'JavaScript',
+    langColor: '#f7df1e',
+    stars: '220k',
+  },
+  {
+    owner: 'kubernetes',
+    repo: 'kubernetes',
+    desc: 'Production-Grade Container Orchestration',
+    lang: 'Go',
+    langColor: '#00add8',
+    stars: '107k',
+  },
+  {
+    owner: 'electron',
+    repo: 'electron',
+    desc: 'Build cross-platform desktop apps',
+    lang: 'C++',
+    langColor: '#f34b7d',
+    stars: '112k',
+  },
+  {
+    owner: 'spring-projects',
+    repo: 'spring-boot',
+    desc: 'Spring Boot makes it easy to create stand-alone apps',
+    lang: 'Java',
+    langColor: '#b07219',
+    stars: '72k',
+  },
+  {
+    owner: 'vercel',
+    repo: 'next.js',
+    desc: 'The React Framework for Production',
+    lang: 'JavaScript',
+    langColor: '#f7df1e',
+    stars: '118k',
+  },
+  {
+    owner: 'pytorch',
+    repo: 'pytorch',
+    desc: 'Tensors and Dynamic neural networks',
+    lang: 'Python',
+    langColor: '#3572a5',
+    stars: '76k',
+  },
+  {
+    owner: 'ansible',
+    repo: 'ansible',
+    desc: 'Ansible is a radically simple IT automation platform',
+    lang: 'Python',
+    langColor: '#3572a5',
+    stars: '60k',
+  },
+  {
+    owner: 'pallets',
+    repo: 'flask',
+    desc: 'The Python micro framework for building web applications',
+    lang: 'Python',
+    langColor: '#3572a5',
+    stars: '66k',
+  },
+  {
+    owner: 'rails',
+    repo: 'rails',
+    desc: 'Ruby on Rails web framework',
+    lang: 'Ruby',
+    langColor: '#cc342d',
+    stars: '54k',
+  },
+  {
+    owner: 'angular',
+    repo: 'angular',
+    desc: "The modern web developer's platform",
+    lang: 'TypeScript',
+    langColor: '#3178c6',
+    stars: '93k',
+  },
+  {
+    owner: 'laravel',
+    repo: 'laravel',
+    desc: 'A PHP framework for web artisans',
+    lang: 'PHP',
+    langColor: '#4f5d95',
+    stars: '76k',
+  },
+  {
+    owner: 'dotnet',
+    repo: 'dotnet',
+    desc: '.NET is a cross-platform runtime',
+    lang: 'C#',
+    langColor: '#178600',
+    stars: '14k',
+  },
+];
 
 export default function HomePage() {
   const router = useRouter();
-  const {
-    fetchTutorial,
-    isLoading,
-    recentProjects,
-    removeFromRecentProjects,
-    clearRecentProjects,
-  } = useTutorial();
+  const { fetchTutorial, isLoading } = useTutorial();
 
+  const [repoUrl, setRepoUrl] = useState('');
   const [language, setLanguage] = useState<Language>('zh-CN');
 
   /**
-   * 处理 URL 提交
+   * 处理表单提交
    */
-  const handleSubmit = async (repoUrl: string) => {
-    try {
-      await fetchTutorial({ repoUrl, language });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      // 跳转到教程页面
-      const encodedUrl = encodeURIComponent(repoUrl);
+    if (!repoUrl.trim()) {
+      message.warning('请输入 GitHub 仓库地址');
+      return;
+    }
+
+    try {
+      await fetchTutorial({ repoUrl: repoUrl.trim(), language });
+      const encodedUrl = encodeURIComponent(repoUrl.trim());
       router.push(`/tutorial?repoUrl=${encodedUrl}&language=${language}`);
     } catch (error) {
       console.error('Failed to fetch tutorial:', error);
-      // 错误处理已在 useTutorial hook 中完成
     }
   };
 
   /**
-   * 选择最近的项目
+   * 点击热门项目
    */
-  const handleSelectRecent = (repoUrl: string) => {
-    handleSubmit(repoUrl);
+  const handleProjectClick = (owner: string, repo: string) => {
+    const url = `https://github.com/${owner}/${repo}`;
+    setRepoUrl(url);
+  };
+
+  /**
+   * 直接学习热门项目
+   */
+  const handleLearnProject = async (owner: string, repo: string) => {
+    const url = `https://github.com/${owner}/${repo}`;
+    try {
+      await fetchTutorial({ repoUrl: url, language });
+      const encodedUrl = encodeURIComponent(url);
+      router.push(`/tutorial?repoUrl=${encodedUrl}&language=${language}`);
+    } catch (error) {
+      console.error('Failed to fetch tutorial:', error);
+    }
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      {/* Header */}
-      <Header style={{ background: '#fff', padding: '0 50px', boxShadow: '0 2px 8px #f0f1f2' }}>
-        <div style={{ display: 'flex', alignItems: 'center', height: '64px' }}>
-          <GithubOutlined style={{ fontSize: '32px', marginRight: '12px' }} />
-          <Title level={3} style={{ margin: 0 }}>
-            LearningGitHub
-          </Title>
+    <div className={styles.pageWrapper}>
+      {/* 导航栏 */}
+      <header className={styles.header}>
+        <div className={styles.logo}>
+          <div className={styles.logoIcon}>
+            <GithubOutlined />
+          </div>
+          <div className={styles.logoText}>
+            <span className={styles.logoTitle}>LearningGitHub</span>
+            <span className={styles.logoSubtitle}>智能每一个GitHub项目</span>
+          </div>
         </div>
-      </Header>
+        <nav className={styles.navLinks}>
+          <a className={styles.navLink} href="#usage">
+            <BookOutlined />
+            使用说明
+          </a>
+          <a className={styles.navLink} href="#about">
+            <InfoCircleOutlined />
+            关于
+          </a>
+        </nav>
+      </header>
 
-      {/* Content */}
-      <Content style={{ padding: '50px 50px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Hero Section */}
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <RocketOutlined style={{ fontSize: '64px', color: '#1890ff' }} />
-              <Title level={1}>快速学习 GitHub 项目</Title>
-              <Paragraph style={{ fontSize: '18px', color: '#595959' }}>
-                输入任意 GitHub 仓库 URL,自动生成结构化学习路径,
-                <br />
-                让你快速理解项目架构和代码实现
-              </Paragraph>
-            </Space>
+      {/* 主内容 */}
+      <main className={styles.main}>
+        <div className={styles.container}>
+          {/* AI 标签 */}
+          <div style={{ textAlign: 'center' }}>
+            <span className={styles.aiTag}>
+              <RocketOutlined />
+              AI 驱动的项目学习助手
+            </span>
           </div>
 
-          {/* Input Section */}
-          <Card
-            style={{
-              maxWidth: '800px',
-              margin: '0 auto 40px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            }}
-          >
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <UrlInput onSubmit={handleSubmit} loading={isLoading} />
-              <Divider style={{ margin: '12px 0' }} />
-              <LanguageSelector
-                value={language}
-                onChange={setLanguage}
-                disabled={isLoading}
-              />
-            </Space>
-          </Card>
-
-          {/* Recent Projects */}
-          {recentProjects.length > 0 && (
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-              <RecentProjects
-                projects={recentProjects}
-                onSelect={handleSelectRecent}
-                onRemove={removeFromRecentProjects}
-                onClearAll={clearRecentProjects}
-              />
+          {/* 步骤流程 */}
+          <div className={styles.stepsSection}>
+            <div className={styles.step}>
+              <div className={`${styles.stepIcon} ${styles.stepIcon1}`}>
+                <LinkOutlined />
+              </div>
+              <div>
+                <div className={styles.stepTitle}>粘贴仓库链接</div>
+                <div className={styles.stepDesc}>复制你想学习的 GitHub 项目链接</div>
+              </div>
             </div>
-          )}
 
-          {/* Features Section */}
-          <div style={{ marginTop: '80px' }}>
-            <Title level={2} style={{ textAlign: 'center', marginBottom: '40px' }}>
-              主要特性
-            </Title>
-            <Space direction="horizontal" size="large" style={{ width: '100%', justifyContent: 'center' }}>
-              <Card hoverable style={{ width: 300 }}>
-                <Title level={4}>🎯 智能分析</Title>
-                <Paragraph>
-                  自动分析代码结构,识别关键模块和依赖关系,生成清晰的学习路径
-                </Paragraph>
-              </Card>
-              <Card hoverable style={{ width: 300 }}>
-                <Title level={4}>📚 分步讲解</Title>
-                <Paragraph>
-                  逐步引导你理解每个模块的功能和实现,配合代码片段深入讲解
-                </Paragraph>
-              </Card>
-              <Card hoverable style={{ width: 300 }}>
-                <Title level={4}>💡 实践建议</Title>
-                <Paragraph>
-                  提供运行环境配置、前置知识要求和学习建议,帮助你快速上手
-                </Paragraph>
-              </Card>
-            </Space>
+            <span className={styles.stepArrow}>&rarr;</span>
+
+            <div className={styles.step}>
+              <div className={`${styles.stepIcon} ${styles.stepIcon2}`}>
+                <ThunderboltOutlined />
+              </div>
+              <div>
+                <div className={styles.stepTitle}>等待解析生成</div>
+                <div className={styles.stepDesc}>AI 自动分析项目生成中文教程</div>
+              </div>
+            </div>
+
+            <span className={styles.stepArrow}>&rarr;</span>
+
+            <div className={styles.step}>
+              <div className={`${styles.stepIcon} ${styles.stepIcon3}`}>
+                <ReadOutlined />
+              </div>
+              <div>
+                <div className={styles.stepTitle}>跟随教程学习</div>
+                <div className={styles.stepDesc}>按照步骤运行项目并理解核心概念</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </Content>
 
-      {/* Footer */}
-      <Footer style={{ textAlign: 'center', background: '#f0f2f5' }}>
-        <Text type="secondary">
-          LearningGitHub © 2024 | Powered by Next.js & FastAPI
-        </Text>
-      </Footer>
-    </Layout>
+          {/* 表单卡片 */}
+          <form className={styles.formCard} onSubmit={handleSubmit}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>GitHub 仓库地址</label>
+              <div className={styles.inputWrapper}>
+                <GithubOutlined className={styles.inputIcon} />
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  placeholder="https://github.com/owner/repo"
+                  value={repoUrl}
+                  onChange={(e) => setRepoUrl(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>教程语言</label>
+              <select
+                className={styles.formSelect}
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                disabled={isLoading}
+              >
+                <option value="zh-CN">简体中文</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
+            <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Spin size="small" />
+                  生成中...
+                </>
+              ) : (
+                <>
+                  <RocketOutlined />
+                  开始学习
+                </>
+              )}
+            </button>
+
+            <div className={styles.hints}>
+              <div className={styles.hint}>
+                <WarningOutlined className={`${styles.hintIcon} ${styles.hintIconWarning}`} />
+                暂时只支持公开仓库
+              </div>
+              <div className={styles.hint}>
+                <ClockCircleOutlined className={`${styles.hintIcon} ${styles.hintIconInfo}`} />
+                解析和生成教程通常需要 30-90 秒
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {/* 热门项目 */}
+        <div className={styles.popularSection}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>最近学习的项目</h2>
+            <p className={styles.sectionSubtitle}>社区正在学习这些热门仓库</p>
+          </div>
+
+          <div className={styles.projectsGrid}>
+            {POPULAR_PROJECTS.map((project) => (
+              <div
+                key={`${project.owner}/${project.repo}`}
+                className={styles.projectCard}
+                onClick={() => handleProjectClick(project.owner, project.repo)}
+              >
+                <div className={styles.projectName}>
+                  {project.owner}/{project.repo}
+                </div>
+                <div className={styles.projectDesc}>{project.desc}</div>
+                <div className={styles.projectMeta}>
+                  <div className={styles.projectLang}>
+                    <span
+                      className={styles.langDot}
+                      style={{ backgroundColor: project.langColor }}
+                    />
+                    {project.lang}
+                    <span className={styles.projectStats}>
+                      <StarOutlined />
+                      {project.stars}
+                    </span>
+                  </div>
+                  <a
+                    className={styles.projectLink}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLearnProject(project.owner, project.repo);
+                    }}
+                  >
+                    继续学习
+                    <ExportOutlined />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.noMore}>没有更多项目了</div>
+        </div>
+      </main>
+
+      {/* 页脚 */}
+      <footer className={styles.footer}>
+        &copy; 2025 LearningGitHub.
+      </footer>
+    </div>
   );
 }
